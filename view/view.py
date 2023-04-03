@@ -35,6 +35,7 @@ class ImageEditor(QMainWindow):
 
         save_file_action = QAction('Save', self)
         save_file_action.setShortcut('Ctrl+S')
+        save_file_action.triggered.connect(self.save_file)
         file_menu.addAction(save_file_action)
         
         exit_action = QAction('Exit', self)
@@ -87,8 +88,19 @@ class ImageEditor(QMainWindow):
 
     def open_file(self):
         dialog = QFileDialog()
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
         dialog.setNameFilter("Images (*.png *.xpm *.jpg *.bmp *.gif)")
         if dialog.exec():
             path = dialog.selectedFiles()[0]
             self.setWindowTitle(path)
             self.presenter.handle_open_image(path)
+
+    def save_file(self):
+        dialog = QFileDialog()
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        window_title = self.windowTitle()
+        dialog.selectFile(window_title)
+        dialog.setNameFilter("Images (*.png *.xpm *.jpg *.bmp *.gif)")
+        if dialog.exec():
+            path = dialog.selectedFiles()[0]
+            self.presenter.handle_save_image(path)

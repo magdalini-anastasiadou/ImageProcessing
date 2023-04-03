@@ -12,3 +12,6 @@ class Model:
 
     def get_image(self) -> np.ndarray:
         return self.image.data
+
+    def save_image(self, image_path: str):
+        self.image.save(image_path)

@@ -18,3 +18,6 @@ class Image:
         image = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
         return cls(image)
 
+    def save(self, image_path: str) -> None:
+        image = cv2.cvtColor(self.data, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(image_path, image)

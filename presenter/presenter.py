@@ -9,6 +9,9 @@ class Presenter:
         self.model.open_image(image_path)
         self.update_view()
 
+    def handle_save_image(self, image_path: str):
+        self.model.save_image(image_path)
+
     def update_view(self):
         image = self.model.get_image()
         self.view.set_image(image)
