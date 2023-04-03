@@ -112,6 +112,9 @@ class ImageEditor(QMainWindow):
         else:
             self.plot_window.setVisible(False)
 
+    def is_plot_visible(self):
+        return self.plot_window.isVisible()
+
     def open_file(self):
         dialog = QFileDialog()
         dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
