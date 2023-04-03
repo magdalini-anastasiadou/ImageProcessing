@@ -26,6 +26,7 @@ class ImageEditor(QMainWindow):
 
         new_file_action = QAction('New File', self)
         new_file_action.setShortcut('Ctrl+N')
+        new_file_action.triggered.connect(self.presenter.handle_new_image)
         file_menu.addAction(new_file_action)
 
         open_file_action = QAction('Open File...', self)
@@ -82,9 +83,12 @@ class ImageEditor(QMainWindow):
             app.setStyleSheet(stylesheet)
 
     def set_image(self, data: np.ndarray):
-        h, w = data.shape[:2]
-        image = QImage(data, w, h, 3 * w, QImage.Format.Format_RGB888)
-        self.image_label.refresh(image)
+        if data is not None:
+            h, w = data.shape[:2]
+            image = QImage(data, w, h, 3 * w, QImage.Format.Format_RGB888)
+            self.image_label.refresh(image)
+        else:
+            self.image_label.refresh(None)
 
     def open_file(self):
         dialog = QFileDialog()
