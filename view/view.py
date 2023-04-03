@@ -61,17 +61,17 @@ class ImageEditor(QMainWindow):
         menu_bar = self.menuBar()
         adjust_menu = menu_bar.addMenu('Adjust')
 
-        gray_scale_action = QAction('Auto B&&W', self)
+        gray_scale_action = QAction(QIcon('view/icons/grayscale.png'), '&Auto B&&W', self)
         adjust_menu.addAction(gray_scale_action)
 
-        brightness_action = QAction('Brightness', self)
+        brightness_action = QAction(QIcon('view/icons/sunny.png'), '&Brightness', self)
         adjust_menu.addAction(brightness_action)
 
     def create_view_menu(self):
         menu_bar = self.menuBar()
         view_menu = menu_bar.addMenu('View')
 
-        histogram_action = QAction('Histogram', self)
+        histogram_action = QAction(QIcon('view/icons/histogram.png'), '&Histogram', self)
         histogram_action.setEnabled(False)
         view_menu.addAction(histogram_action)
 

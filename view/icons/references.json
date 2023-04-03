@@ -3,4 +3,16 @@
       "icon": "colour.png",
       "reference": '<a href="https://www.flaticon.com/free-icons/print" title="print icons">Print icons created by Smashicons - Flaticon</a>',
     },
-  }
+    "2": {
+      "icon": "grayscale.png",
+      "reference": '<a href="https://www.flaticon.com/free-icons/grayscale" title="grayscale icons">Grayscale icons created by Alfredo Creates - Flaticon</a>',
+    },
+    "3": {
+      "icon": "sunny.png",
+      "reference": '<a href="https://www.flaticon.com/free-icons/brightness" title="brightness icons">Brightness icons created by Muhammad Ali - Flaticon</a>',
+    },
+    "4": {
+      "icon": "histogram.png",
+      "reference": '<a href="https://www.flaticon.com/free-icons/histogram" title="histogram icons">Histogram icons created by Freepik - Flaticon</a>',
+    },
+}
