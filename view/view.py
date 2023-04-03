@@ -3,10 +3,22 @@ from view.Widgets import ImageArea
 import numpy as np
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog
 from PyQt5.QtGui import QIcon, QImage
+from typing import Protocol
+
+
+class Presenter(Protocol):
+    def handle_new_image(self):
+        pass
+
+    def handle_open_image(self, image_path: str):
+        pass
+
+    def handle_save_image(self, image_path: str):
+        pass
 
 
 class ImageEditor(QMainWindow):
-    def initUI(self, presenter):
+    def initUI(self, presenter: Presenter):
         self.presenter = presenter
         self.image_label = ImageArea(self)
         self.setCentralWidget(self.image_label)

@@ -1,7 +1,30 @@
+from __future__ import annotations
+import numpy as np
+
+from typing import Protocol, Union
+
+
+class View(Protocol):
+    def set_image(self, image: Union[np.ndarray, None]) -> None:
+        pass
+
+
+class Model(Protocol):
+    def open_image(self, image_path: str) -> None:
+        pass
+
+    def get_image(self) -> Union[np.ndarray, None]:
+        pass
+
+    def save_image(self, image_path: str) -> None:
+        pass
+
+    def set_image(self, image: Union[np.ndarray, None]) -> None:
+        pass
 
 
 class Presenter:
-    def __init__(self, model, view):
+    def __init__(self, model: Model, view: View):
         self.model = model
         self.view = view
 
