@@ -104,6 +104,7 @@ class ImageEditor(QMainWindow):
             image = QImage(data, w, h, 3 * w, QImage.Format.Format_RGB888)
             self.image_label.refresh(image)
         else:
+            self.setWindowTitle("Image Editor")
             self.image_label.refresh(None)
 
     def set_plot(self, figure):
