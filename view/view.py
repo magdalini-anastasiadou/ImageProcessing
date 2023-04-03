@@ -1,4 +1,4 @@
-from view.Widgets import ImageArea
+from view.Widgets import ImageArea, PlotWindow
 
 import numpy as np
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog
@@ -16,11 +16,15 @@ class Presenter(Protocol):
     def handle_save_image(self, image_path: str):
         pass
 
+    def handle_show_histogram(self):
+        pass
+
 
 class ImageEditor(QMainWindow):
     def initUI(self, presenter: Presenter):
         self.presenter = presenter
         self.image_label = ImageArea(self)
+        self.plot_window = PlotWindow(self)
         self.setCentralWidget(self.image_label)
 
         self.setWindowTitle("Image Editor")
@@ -85,7 +89,7 @@ class ImageEditor(QMainWindow):
         view_menu = menu_bar.addMenu('View')
 
         histogram_action = QAction(QIcon('view/icons/histogram.png'), '&Histogram', self)
-        histogram_action.setEnabled(False)
+        histogram_action.triggered.connect(self.presenter.handle_show_histogram)
         view_menu.addAction(histogram_action)
 
     def set_window_style(self):
@@ -101,6 +105,12 @@ class ImageEditor(QMainWindow):
             self.image_label.refresh(image)
         else:
             self.image_label.refresh(None)
+
+    def set_plot(self, figure):
+        if figure is not None:
+            self.plot_window.refresh(figure)
+        else:
+            self.plot_window.setVisible(False)
 
     def open_file(self):
         dialog = QFileDialog()

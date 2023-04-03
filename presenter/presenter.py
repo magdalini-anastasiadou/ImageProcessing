@@ -1,11 +1,15 @@
 from __future__ import annotations
 import numpy as np
+import matplotlib.pyplot as plt
 
 from typing import Protocol, Union
 
 
 class View(Protocol):
     def set_image(self, image: Union[np.ndarray, None]) -> None:
+        pass
+
+    def set_plot(self, figure: Union[plt.figure, None]) -> None:
         pass
 
 
@@ -42,3 +46,7 @@ class Presenter:
     def update_view(self):
         image = self.model.get_image()
         self.view.set_image(image)
+
+    def handle_show_histogram(self):
+        figure = self.model.get_histogram_figure()
+        self.view.set_plot(figure)

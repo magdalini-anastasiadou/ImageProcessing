@@ -1,6 +1,7 @@
 from model.processing import Image
 
 import numpy as np
+import matplotlib.pyplot as plt
 from typing import Union
 
 
@@ -19,3 +20,6 @@ class Model:
 
     def set_image(self, image: Union[np.ndarray, None]):
         self.image = image
+
+    def get_histogram_figure(self) -> Union[plt.figure, None]:
+        return self.image.create_histogram_figure()
