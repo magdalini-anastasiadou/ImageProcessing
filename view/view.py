@@ -1,13 +1,16 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction
-from PyQt5.QtGui import QIcon
+from view.Widgets import ImageArea
+
+import numpy as np
+from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog
+from PyQt5.QtGui import QIcon, QImage
 
 
 class ImageEditor(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
+    def initUI(self, presenter):
+        self.presenter = presenter
+        self.image_label = ImageArea(self)
+        self.setCentralWidget(self.image_label)
 
-    def initUI(self):
         self.setWindowTitle("Image Editor")
         self.setWindowIcon(QIcon("view/icons/colour.png"))
         self.create_file_menu()
@@ -27,6 +30,7 @@ class ImageEditor(QMainWindow):
 
         open_file_action = QAction('Open File...', self)
         open_file_action.setShortcut('Ctrl+O')
+        open_file_action.triggered.connect(self.open_file)
         file_menu.addAction(open_file_action)
 
         save_file_action = QAction('Save', self)
@@ -75,3 +79,16 @@ class ImageEditor(QMainWindow):
             app = QApplication.instance()
             stylesheet = f.read()
             app.setStyleSheet(stylesheet)
+
+    def set_image(self, data: np.ndarray):
+        h, w = data.shape[:2]
+        image = QImage(data, w, h, 3 * w, QImage.Format.Format_RGB888)
+        self.image_label.refresh(image)
+
+    def open_file(self):
+        dialog = QFileDialog()
+        dialog.setNameFilter("Images (*.png *.xpm *.jpg *.bmp *.gif)")
+        if dialog.exec():
+            path = dialog.selectedFiles()[0]
+            self.setWindowTitle(path)
+            self.presenter.handle_open_image(path)

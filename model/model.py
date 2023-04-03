@@ -1,4 +1,14 @@
+from model.processing import Image
+
+import numpy as np
 
 
 class Model:
-    pass
+    def __init__(self):
+        self.image = None
+
+    def open_image(self, image_path: str):
+        self.image = Image.open(image_path)
+
+    def get_image(self) -> np.ndarray:
+        return self.image.data

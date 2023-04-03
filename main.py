@@ -11,6 +11,7 @@ def main() -> None:
     model = Model()
     view = ImageEditor()
     presenter = Presenter(model, view)
+    view.initUI(presenter)
     view.show()
     sys.exit(app.exec_())
 
