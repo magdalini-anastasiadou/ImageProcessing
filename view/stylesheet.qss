@@ -1,20 +1,17 @@
 
 QWidget {
-    background-color: #1e1e1e;
-}
-
-QAction {
-    background-color: #2d2d2d;
+    background-color: #262626;
     color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
 }
 
-QScrollBar, QSlider {
+QSlider {
     background-color: #1e1e1e;
 }
 
 QMenuBar, QMenu {
-    background-color: #2d2d2d;
-    color: #ffffff;
+    border: none;
 }
 
 QMenuBar::item:selected, QMenuBar::item:hover {
@@ -25,7 +22,6 @@ QMenu::item:selected, QMenu::item:hover {
     background-color: transparent;
 }
 
-QMenuBar {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 14px;
+ImageArea {
+    border: none;
 }

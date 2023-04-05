@@ -1,7 +1,8 @@
-from view.Widgets import ImageArea, PlotWindow
+from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow
 
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog, 
+                             QDockWidget, QVBoxLayout, QWidget, QHBoxLayout, QPushButton)
 from PyQt5.QtGui import QIcon, QImage
 from typing import Protocol
 
@@ -19,12 +20,19 @@ class Presenter(Protocol):
     def handle_show_histogram(self):
         pass
 
+    def handle_cancel(self):
+        pass
+
+    def handle_accept(self):
+        pass
+
 
 class ImageEditor(QMainWindow):
     def initUI(self, presenter: Presenter):
         self.presenter = presenter
         self.image_label = ImageArea(self)
         self.plot_window = PlotWindow(self)
+        self.light_window = self.create_light_window()
         self.setCentralWidget(self.image_label)
 
         self.setWindowTitle("Image Editor")
@@ -81,8 +89,9 @@ class ImageEditor(QMainWindow):
         gray_scale_action = QAction(QIcon('view/icons/grayscale.png'), '&Auto B&&W', self)
         adjust_menu.addAction(gray_scale_action)
 
-        brightness_action = QAction(QIcon('view/icons/sunny.png'), '&Brightness', self)
-        adjust_menu.addAction(brightness_action)
+        light_action = QAction(QIcon('view/icons/sunny.png'), '&Light', self)
+        light_action.triggered.connect(self.show_light_dialog)
+        adjust_menu.addAction(light_action)
 
     def create_view_menu(self):
         menu_bar = self.menuBar()
@@ -134,3 +143,19 @@ class ImageEditor(QMainWindow):
         if dialog.exec():
             path = dialog.selectedFiles()[0]
             self.presenter.handle_save_image(path)
+
+    def create_light_window(self):
+        b_slider = Slider("Brightness", 'view/icons/sun.png', -100, 100)
+        b_slider.valueChanged.connect(self.presenter.handle_brightness_changed)
+        # e_slider = Slider("Exposure", 'view/icons/exposure.png', -100, 100)
+        # c_slider = Slider("Contrast", 'view/icons/contrast.png', -100, 100)
+        # children = [b_slider, e_slider, c_slider]
+        window = EditWindow("Light", "view/icons/sunny-black.png")
+        window.onCancel.connect(self.presenter.handle_cancel)
+        window.onAccept.connect(self.presenter.handle_accept)
+        window.createUI([b_slider])
+        return window
+
+    def show_light_dialog(self):
+        self.light_window.adjustSize()
+        self.light_window.setVisible(True)

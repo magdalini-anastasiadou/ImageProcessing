@@ -1,18 +1,30 @@
 {
-    "1": {
+  "1": {
       "icon": "colour.png",
-      "reference": '<a href="https://www.flaticon.com/free-icons/print" title="print icons">Print icons created by Smashicons - Flaticon</a>',
-    },
-    "2": {
+      "reference": "Print icons created by Smashicons - Flaticon (https://www.flaticon.com/free-icons/print)"
+  },
+  "2": {
       "icon": "grayscale.png",
-      "reference": '<a href="https://www.flaticon.com/free-icons/grayscale" title="grayscale icons">Grayscale icons created by Alfredo Creates - Flaticon</a>',
-    },
-    "3": {
+      "reference": "Grayscale icons created by Alfredo Creates - Flaticon (https://www.flaticon.com/free-icons/grayscale)"
+  },
+  "3": {
       "icon": "sunny.png",
-      "reference": '<a href="https://www.flaticon.com/free-icons/brightness" title="brightness icons">Brightness icons created by Muhammad Ali - Flaticon</a>',
-    },
-    "4": {
+      "reference": "Brightness icons created by Muhammad Ali - Flaticon (https://www.flaticon.com/free-icons/brightness)"
+  },
+  "4": {
       "icon": "histogram.png",
-      "reference": '<a href="https://www.flaticon.com/free-icons/histogram" title="histogram icons">Histogram icons created by Freepik - Flaticon</a>',
-    },
+      "reference": "Histogram icons created by Freepik - Flaticon (https://www.flaticon.com/free-icons/histogram)"
+  },
+  "5": {
+      "icon": "sun.png",
+      "reference": "Sun icons created by Good Ware - Flaticon (https://www.flaticon.com/free-icons/sun)"
+  },
+  "6": {
+      "icon": "exposure.png",
+      "reference": "Exposure icons created by Creatype - Flaticon (https://www.flaticon.com/free-icons/exposure)"
+  },
+  "7": {
+      "icon": "contrast.png",
+      "reference": "Contrast icons created by Freepik - Flaticon (https://www.flaticon.com/free-icons/contrast)"
+  }
 }

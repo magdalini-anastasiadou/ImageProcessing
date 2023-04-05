@@ -37,3 +37,7 @@ class Image:
             ax.plot(self.get_histogram(0), color="black")
         ax.set_title("Histogram")
         return figure
+
+    def set_brightness(self, brightness: int) -> np.ndarray:
+        data = self.data.astype(np.float64)
+        self.data = np.clip(data + brightness, 0, 255).astype(np.uint8)

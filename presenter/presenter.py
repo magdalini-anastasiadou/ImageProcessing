@@ -73,3 +73,12 @@ class Presenter:
     def update_plot(self):
         if self.view.is_plot_visible():
             self.handle_show_histogram()
+
+    def handle_brightness_changed(self, brightness: int):
+        self.model.set_brightness(brightness)
+
+    def handle_cancel(self):
+        self.model.cancel()
+
+    def handle_accept(self):
+        self.model.accept()
