@@ -3,58 +3,62 @@ from model.signal import Signal
 
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Union
+from typing import Union, Any
 
 
-class Model:
+
+class Model():
     image_changed = Signal()
 
     def __init__(self):
         self.image = None
-        self.current_idx = 0
-        self.actions = []
+        self._methods_map = {"brightness": Image.set_brightness, "contrast": Image.set_contrast}
+        self._edit_actions = []
+        self._last_accepted_idx = 0
 
-    def open_image(self, image_path: str):
+    def open_file(self, image_path: str):
+        self._edit_actions.clear()
         self.image = Image.open(image_path)
         self.image_changed.emit()
 
-    def get_image(self) -> Union[np.ndarray, None]:
+    def save_file(self, image_path: str):
         if self.image:
-            data = self.image.data
-            for action, args in self.actions:
-                image = Image(data)
-                action(image, *args)
-                data = image.data
-            return data
+            self.image.save(image_path)
 
-    def save_image(self, image_path: str):
-        self.image.save(image_path)
-
-    def set_image(self, image: Union[np.ndarray, None]):
-        self.image = image
+    def clear(self):
+        self.image = None
         self.image_changed.emit()
+
+    def _get_image_with_edits(self) -> Union[Image, None]:
+        img = self.image
+        for method, value, use_last in self._edit_actions:
+            if use_last:
+                img = Image(img.data)
+                method(img, value)
+            else:
+                method(value)
+        return img
+
+    def get_data(self) -> Union[np.ndarray, None]:
+        return self._get_image_with_edits().data if self.image else None
 
     def get_histogram_figure(self) -> Union[plt.figure, None]:
-        return self.image.create_histogram_figure() if self.image else None
+        image = self._get_image_with_edits()
+        return image.create_histogram_figure() if self.image else None
 
-    def set_brightness(self, brightness: int):
-        if self.current_idx == len(self.actions):
-            self.actions.append((Image.set_brightness, (brightness, )))
-        else:
-            self.actions[self.current_idx] = (Image.set_brightness, (brightness, ))
-        self.image_changed.emit()
-    
-    def set_contrast(self, contrast: int):
-        if self.current_idx == len(self.actions):
-            self.actions.append((Image.set_contrast, (contrast, )))
-        else:
-            self.actions[self.current_idx] = (Image.set_contrast, (contrast, ))
-        self.image_changed.emit()
+    def set_attribute(self, name: str, value: Any):
+        if name in self._methods_map:
+            action = (self._methods_map[name], value, True)
+            if self._edit_actions and self._edit_actions[-1][0] == self._methods_map[name]:
+                self._edit_actions[-1] = action
+            else:
+                self._edit_actions.append(action)
+            self.image_changed.emit()
 
     def accept(self):
-        self.current_idx += 1
+        self._edit_actions.append((lambda v: True, None, False))
+        self._last_accepted_idx = len(self._edit_actions)
 
     def cancel(self):
-        self.actions = self.actions[:len(self.actions) - 1]
-        self.current_idx = len(self.actions)
+        self._edit_actions = self._edit_actions[:self._last_accepted_idx]
         self.image_changed.emit()

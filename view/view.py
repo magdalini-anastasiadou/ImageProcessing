@@ -1,34 +1,13 @@
 from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow
 
 import numpy as np
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog, 
-                             QDockWidget, QVBoxLayout, QWidget, QHBoxLayout, QPushButton)
-from PyQt5.QtGui import QIcon, QImage
-from typing import Protocol
-
-
-class Presenter(Protocol):
-    def handle_new_image(self):
-        pass
-
-    def handle_open_image(self, image_path: str):
-        pass
-
-    def handle_save_image(self, image_path: str):
-        pass
-
-    def handle_show_histogram(self):
-        pass
-
-    def handle_cancel(self):
-        pass
-
-    def handle_accept(self):
-        pass
+from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog
+from PyQt5.QtGui import QImage
+from PyQt5.QtGui import QIcon
 
 
 class ImageEditor(QMainWindow):
-    def initUI(self, presenter: Presenter):
+    def initUI(self, presenter):
         self.presenter = presenter
         self.image_label = ImageArea(self)
         self.plot_window = PlotWindow(self)
@@ -107,7 +86,7 @@ class ImageEditor(QMainWindow):
             stylesheet = f.read()
             app.setStyleSheet(stylesheet)
 
-    def set_image(self, data: np.ndarray):
+    def set_data(self, data: np.ndarray):
         if data is not None:
             h, w = data.shape[:2]
             image = QImage(data, w, h, 3 * w, QImage.Format.Format_RGB888)
@@ -132,7 +111,7 @@ class ImageEditor(QMainWindow):
         if dialog.exec():
             path = dialog.selectedFiles()[0]
             self.setWindowTitle(path)
-            self.presenter.handle_open_image(path)
+            self.presenter.handle_open_file(path)
 
     def save_file(self):
         dialog = QFileDialog()
@@ -142,18 +121,17 @@ class ImageEditor(QMainWindow):
         dialog.setNameFilter("Images (*.png *.xpm *.jpg *.bmp *.gif)")
         if dialog.exec():
             path = dialog.selectedFiles()[0]
-            self.presenter.handle_save_image(path)
+            self.presenter.handle_save_file(path)
 
     def create_light_window(self):
         b_slider = Slider("Brightness", 'view/icons/sun.png', -100, 100)
         b_slider.valueChanged.connect(self.presenter.handle_brightness_changed)
-        # e_slider = Slider("Exposure", 'view/icons/exposure.png', -100, 100)
-        # c_slider = Slider("Contrast", 'view/icons/contrast.png', -100, 100)
-        # children = [b_slider, e_slider, c_slider]
+        c_slider = Slider("Contrast", 'view/icons/contrast.png', -100, 100)
+        c_slider.valueChanged.connect(self.presenter.handle_contrast_changed)
         window = EditWindow("Light", "view/icons/sunny-black.png")
         window.onCancel.connect(self.presenter.handle_cancel)
         window.onAccept.connect(self.presenter.handle_accept)
-        window.createUI([b_slider])
+        window.createUI([b_slider, c_slider])
         return window
 
     def show_light_dialog(self):

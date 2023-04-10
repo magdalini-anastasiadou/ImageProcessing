@@ -39,5 +39,13 @@ class Image:
         return figure
 
     def set_brightness(self, brightness: int) -> np.ndarray:
-        data = self.data.astype(np.float64)
+        data = self.data.astype(np.int16)
         self.data = np.clip(data + brightness, 0, 255).astype(np.uint8)
+
+    def set_contrast(self, contrast: int) -> np.ndarray:
+        data = self.data.astype(np.int16)
+        if contrast >= 0:
+            factor = (259 * (contrast + 255)) / (255 * (259 - contrast))
+        else:
+            factor = (259 * (contrast + 255)) / (255 * (259 + contrast))
+        self.data = np.clip((factor * (data - 128) + 128), 0, 255).astype(np.uint8)

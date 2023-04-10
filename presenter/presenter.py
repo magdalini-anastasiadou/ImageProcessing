@@ -1,70 +1,24 @@
-from __future__ import annotations
-import numpy as np
-import matplotlib.pyplot as plt
-
-from typing import Protocol, Union, Callable
-
-
-class Signal(Protocol):
-    def connect(self, callback: Callable) -> None:
-        pass
-
-    def disconnect(self, callback: Callable) -> None:
-        pass
-
-    def emit(self, *args, **kwargs):
-        pass
-
-
-class View(Protocol):
-    def set_image(self, image: Union[np.ndarray, None]) -> None:
-        pass
-
-    def set_plot(self, figure: Union[plt.figure, None]) -> None:
-        pass
-
-    def is_plot_visible(self) -> bool:
-        pass
-
-
-class Model(Protocol):
-    image_changed: Signal
-
-    def open_image(self, image_path: str) -> None:
-        pass
-
-    def get_image(self) -> Union[np.ndarray, None]:
-        pass
-
-    def save_image(self, image_path: str) -> None:
-        pass
-
-    def set_image(self, image: Union[np.ndarray, None]) -> None:
-        pass
-
-    def get_histogram_figure(self) -> Union[plt.figure, None]:
-        pass
 
 
 class Presenter:
-    def __init__(self, model: Model, view: View):
+    def __init__(self, model, view):
         self.model = model
         self.model.image_changed.connect(self.update_view)
         self.model.image_changed.connect(self.update_plot)
         self.view = view
 
     def handle_new_image(self):
-        self.model.set_image(None)
+        self.model.clear()
 
-    def handle_open_image(self, image_path: str):
-        self.model.open_image(image_path)
+    def handle_open_file(self, fname: str):
+        self.model.open_file(fname)
 
-    def handle_save_image(self, image_path: str):
-        self.model.save_image(image_path)
+    def handle_save_file(self, fname: str):
+        self.model.save_file(fname)
 
     def update_view(self):
-        image = self.model.get_image()
-        self.view.set_image(image)
+        data = self.model.get_data()
+        self.view.set_data(data)
 
     def handle_show_histogram(self):
         figure = self.model.get_histogram_figure()
@@ -74,8 +28,11 @@ class Presenter:
         if self.view.is_plot_visible():
             self.handle_show_histogram()
 
-    def handle_brightness_changed(self, brightness: int):
-        self.model.set_brightness(brightness)
+    def handle_brightness_changed(self, brightness: float):
+        self.model.set_attribute("brightness", brightness)
+
+    def handle_contrast_changed(self, contrast: float):
+        self.model.set_attribute("contrast", contrast)
 
     def handle_cancel(self):
         self.model.cancel()
