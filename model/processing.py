@@ -38,11 +38,11 @@ class Image:
         ax.set_title("Histogram")
         return figure
 
-    def set_brightness(self, brightness: int) -> np.ndarray:
+    def set_brightness(self, brightness: int) -> None:
         data = self.data.astype(np.int16)
         self.data = np.clip(data + brightness, 0, 255).astype(np.uint8)
 
-    def set_contrast(self, contrast: int) -> np.ndarray:
+    def set_contrast(self, contrast: int) -> None:
         data = self.data.astype(np.int16)
         if contrast >= 0:
             factor = (259 * (contrast + 255)) / (255 * (259 - contrast))
