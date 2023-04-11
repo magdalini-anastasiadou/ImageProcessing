@@ -26,5 +26,13 @@
   "7": {
       "icon": "contrast.png",
       "reference": "Contrast icons created by Freepik - Flaticon (https://www.flaticon.com/free-icons/contrast)"
+  },
+  "8": {
+        "icon": "menu.png",
+        "reference": "Ui icons created by icon wind - Flaticon (https://www.flaticon.com/free-icons/ui"
+  },
+  "9": {
+        "icon": "edit.png",
+        "reference": "Edit icons created by Kiranshastry - Flaticon (https://www.flaticon.com/free-icons/edit)"
   }
 }

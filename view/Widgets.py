@@ -96,13 +96,12 @@ class Slider(QWidget):
         return super().showEvent(a0)
 
 
-class EditWindow(QDockWidget):
+class EditWindow(QWidget):
     onAccept = pyqtSignal()
     onCancel = pyqtSignal()
 
     def __init__(self, title: str, icon_path: str, parent=None):
-        super().__init__(title, parent)
-        self.setFloating(True)
+        super().__init__(parent=parent)
         self.setWindowIcon(QIcon(icon_path))
         self.setVisible(False)
 
@@ -130,6 +129,4 @@ class EditWindow(QDockWidget):
             stylesheet = f.read()
             apply_button.setStyleSheet(stylesheet)
 
-        temp = QWidget()
-        temp.setLayout(v_layout)
-        self.setWidget(temp)
+        self.setLayout(v_layout)

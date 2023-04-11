@@ -1,9 +1,9 @@
-from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow
+from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow, Spacer
 
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog
-from PyQt5.QtGui import QImage
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog, QWidget, QGridLayout
+from PyQt5.QtGui import QImage, QIcon
+from PyQt5.QtCore import Qt
 
 
 class ImageEditor(QMainWindow):
@@ -12,20 +12,35 @@ class ImageEditor(QMainWindow):
         self.image_label = ImageArea(self)
         self.plot_window = PlotWindow(self)
         self.light_window = self.create_light_window()
-        self.setCentralWidget(self.image_label)
+        self.create_central_widget()
 
         self.setWindowTitle("Image Editor")
         self.setWindowIcon(QIcon("view/icons/colour.png"))
         self.create_file_menu()
-        self.create_edit_menu()
         self.create_adjust_menu()
         self.create_view_menu()
         self.set_window_style()
         self.showMaximized()
 
+    def create_central_widget(self):
+        widget = QWidget()
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(0)
+
+        grid.addWidget(self.light_window, 0, 0, 1, 1)
+        grid.addWidget(Spacer(), 1, 0, 1, 1)
+        grid.addWidget(self.image_label, 0, 1, 2, 2)
+        grid.setRowStretch(0, 2)
+        grid.setRowStretch(1, 5)
+        grid.setColumnStretch(0, 0)
+        grid.setColumnStretch(1, 10)
+        grid.setSpacing(-1)
+        widget.setLayout(grid)
+        self.setCentralWidget(widget)
+
     def create_file_menu(self):
         menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu('File')
+        file_menu = menu_bar.addMenu(QIcon('view/icons/menu.png'), '')
 
         new_file_action = QAction('New File', self)
         new_file_action.setShortcut('Ctrl+N')
@@ -41,32 +56,10 @@ class ImageEditor(QMainWindow):
         save_file_action.setShortcut('Ctrl+S')
         save_file_action.triggered.connect(self.save_file)
         file_menu.addAction(save_file_action)
-        
-        exit_action = QAction('Exit', self)
-        exit_action.setShortcut('Ctrl+Q')
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
 
-    def create_edit_menu(self):
-        menu_bar = self.menuBar()
-        edit_menu = menu_bar.addMenu('Edit')
-
-        undo_action = QAction('Undo', self)
-        undo_action.setShortcut('Ctrl+Z')
-        undo_action.setEnabled(False)
-        edit_menu.addAction(undo_action)
-
-        redo_action = QAction('Redo', self)
-        redo_action.setShortcut('Ctrl+Y')
-        redo_action.setEnabled(False)
-        edit_menu.addAction(redo_action)
-    
     def create_adjust_menu(self):
         menu_bar = self.menuBar()
-        adjust_menu = menu_bar.addMenu('Adjust')
-
-        gray_scale_action = QAction(QIcon('view/icons/grayscale.png'), '&Auto B&&W', self)
-        adjust_menu.addAction(gray_scale_action)
+        adjust_menu = menu_bar.addMenu(QIcon('view/icons/edit.png'), "")
 
         light_action = QAction(QIcon('view/icons/sunny.png'), '&Light', self)
         light_action.triggered.connect(self.show_light_dialog)
@@ -74,9 +67,9 @@ class ImageEditor(QMainWindow):
 
     def create_view_menu(self):
         menu_bar = self.menuBar()
-        view_menu = menu_bar.addMenu('View')
+        view_menu = menu_bar.addMenu(QIcon('view/icons/histogram.png'), '')
 
-        histogram_action = QAction(QIcon('view/icons/histogram.png'), '&Histogram', self)
+        histogram_action = QAction('&Histogram', self)
         histogram_action.triggered.connect(self.presenter.handle_show_histogram)
         view_menu.addAction(histogram_action)
 
