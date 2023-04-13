@@ -1,7 +1,8 @@
 from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow, Spacer
 
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QFileDialog, QWidget, QGridLayout
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog, QWidget, 
+                             QLabel, QSpinBox, QHBoxLayout)
 from PyQt5.QtGui import QImage, QIcon
 from PyQt5.QtCore import Qt
 
@@ -9,9 +10,7 @@ from PyQt5.QtCore import Qt
 class ImageEditor(QMainWindow):
     def initUI(self, presenter):
         self.presenter = presenter
-        self.image_label = ImageArea(self)
         self.plot_window = PlotWindow(self)
-        self.light_window = self.create_light_window()
         self.create_central_widget()
 
         self.setWindowTitle("Image Editor")
@@ -23,20 +22,11 @@ class ImageEditor(QMainWindow):
         self.showMaximized()
 
     def create_central_widget(self):
-        widget = QWidget()
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(0)
+        self.image_label = ImageArea(self)
+        self.light_window = self.create_light_window()
+        self.filters_window = self.create_filters_window()
 
-        grid.addWidget(self.light_window, 0, 0, 1, 1)
-        grid.addWidget(Spacer(), 1, 0, 1, 1)
-        grid.addWidget(self.image_label, 0, 1, 2, 2)
-        grid.setRowStretch(0, 2)
-        grid.setRowStretch(1, 5)
-        grid.setColumnStretch(0, 0)
-        grid.setColumnStretch(1, 10)
-        grid.setSpacing(-1)
-        widget.setLayout(grid)
-        self.setCentralWidget(widget)
+        self.setCentralWidget(self.image_label)
 
     def create_file_menu(self):
         menu_bar = self.menuBar()
@@ -64,6 +54,10 @@ class ImageEditor(QMainWindow):
         light_action = QAction(QIcon('view/icons/sunny.png'), '&Light', self)
         light_action.triggered.connect(self.show_light_dialog)
         adjust_menu.addAction(light_action)
+
+        filters_action = QAction(QIcon('view/icons/magic-wand.png'), '&Filters', self)
+        filters_action.triggered.connect(self.show_filters_dialog)
+        adjust_menu.addAction(filters_action)
 
     def create_view_menu(self):
         menu_bar = self.menuBar()
@@ -127,6 +121,28 @@ class ImageEditor(QMainWindow):
         window.createUI([b_slider, c_slider])
         return window
 
+    def create_filters_window(self):
+        window = EditWindow("Filters", "view/icons/magic-wand.png")
+        average_filter = QWidget()
+        average_filter_label = QLabel("Average Filter")
+        average_spin_box = QSpinBox()
+        average_spin_box.setMinimum(0)
+        average_spin_box.setMaximum(100)
+        average_spin_box.setSingleStep(1)
+        h_layout = QHBoxLayout()
+        h_layout.addWidget(average_filter_label)
+        h_layout.addWidget(average_spin_box)
+        average_filter.setLayout(h_layout)
+        average_spin_box.valueChanged.connect(self.presenter.handle_average_filter)
+        window.createUI([average_filter])
+        window.onCancel.connect(self.presenter.handle_cancel)
+        window.onAccept.connect(self.presenter.handle_accept)
+        return window
+
     def show_light_dialog(self):
         self.light_window.adjustSize()
         self.light_window.setVisible(True)
+
+    def show_filters_dialog(self):
+        self.filters_window.adjustSize()
+        self.filters_window.setVisible(True)
