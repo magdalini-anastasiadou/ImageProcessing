@@ -48,6 +48,9 @@ class PlotWindow(QDockWidget):
     def __init__(self, parent=None):
         super().__init__("Plot", parent)
         self.setVisible(False)
+        self.setFeatures(self.features() | QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+
         self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
         self.setFloating(True)
@@ -96,12 +99,15 @@ class Slider(QWidget):
         return super().showEvent(a0)
 
 
-class EditWindow(QWidget):
+class EditWindow(QDockWidget):
     onAccept = pyqtSignal()
     onCancel = pyqtSignal()
 
     def __init__(self, title: str, icon_path: str, parent=None):
-        super().__init__(parent=parent)
+        super().__init__(title, parent)
+        self.setFloating(True)
+        self.setFeatures(self.features() | QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         self.setWindowIcon(QIcon(icon_path))
         self.setVisible(False)
 
@@ -129,4 +135,6 @@ class EditWindow(QWidget):
             stylesheet = f.read()
             apply_button.setStyleSheet(stylesheet)
 
-        self.setLayout(v_layout)
+        temp = QWidget()
+        temp.setLayout(v_layout)
+        self.setWidget(temp)

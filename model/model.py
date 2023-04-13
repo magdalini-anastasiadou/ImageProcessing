@@ -12,7 +12,11 @@ class Model():
 
     def __init__(self):
         self.image = None
-        self._methods_map = {"brightness": Image.set_brightness, "contrast": Image.set_contrast}
+        self._methods_map = {
+            "brightness": Image.set_brightness, 
+            "contrast": Image.set_contrast, 
+            "average_filter": Image.average_filter
+        }
         self._edit_actions = []
         self._last_accepted_idx = 0
 

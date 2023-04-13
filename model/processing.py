@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import cv2
 import numpy as np
+from scipy import signal
 import matplotlib.pyplot as plt
 
 
@@ -49,3 +50,12 @@ class Image:
         else:
             factor = (259 * (contrast + 255)) / (255 * (259 + contrast))
         self.data = np.clip((factor * (data - 128) + 128), 0, 255).astype(np.uint8)
+
+    def average_filter(self, size: int) -> None:
+        if size != 0:
+            filter_image = np.ones((size, size)) / (size * size)
+            red = signal.convolve(self.data[:, :, 0], filter_image, mode="same")
+            green = signal.convolve(self.data[:, :, 1], filter_image, mode="same")
+            blue = signal.convolve(self.data[:, :, 2], filter_image, mode="same")
+            self.data = np.dstack((red, green, blue))
+            self.data = np.clip(self.data, 0, 255).astype(np.uint8)
