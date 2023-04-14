@@ -1,10 +1,8 @@
-from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow, Spacer
+from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow, SpinBox
 
 import numpy as np
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog, QWidget, 
-                             QLabel, QSpinBox, QHBoxLayout)
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog)
 from PyQt5.QtGui import QImage, QIcon
-from PyQt5.QtCore import Qt
 
 
 class ImageEditor(QMainWindow):
@@ -52,11 +50,11 @@ class ImageEditor(QMainWindow):
         adjust_menu = menu_bar.addMenu(QIcon('view/icons/edit.png'), "")
 
         light_action = QAction(QIcon('view/icons/sunny.png'), '&Light', self)
-        light_action.triggered.connect(self.show_light_dialog)
+        light_action.triggered.connect(self.light_window.show)
         adjust_menu.addAction(light_action)
 
         filters_action = QAction(QIcon('view/icons/magic-wand.png'), '&Filters', self)
-        filters_action.triggered.connect(self.show_filters_dialog)
+        filters_action.triggered.connect(self.filters_window.show)
         adjust_menu.addAction(filters_action)
 
     def create_view_menu(self):
@@ -123,26 +121,9 @@ class ImageEditor(QMainWindow):
 
     def create_filters_window(self):
         window = EditWindow("Filters", "view/icons/magic-wand.png")
-        average_filter = QWidget()
-        average_filter_label = QLabel("Average Filter")
-        average_spin_box = QSpinBox()
-        average_spin_box.setMinimum(0)
-        average_spin_box.setMaximum(100)
-        average_spin_box.setSingleStep(1)
-        h_layout = QHBoxLayout()
-        h_layout.addWidget(average_filter_label)
-        h_layout.addWidget(average_spin_box)
-        average_filter.setLayout(h_layout)
+        average_spin_box = SpinBox("Average Filter", 0, 100)
         average_spin_box.valueChanged.connect(self.presenter.handle_average_filter)
-        window.createUI([average_filter])
+        window.createUI([average_spin_box])
         window.onCancel.connect(self.presenter.handle_cancel)
         window.onAccept.connect(self.presenter.handle_accept)
         return window
-
-    def show_light_dialog(self):
-        self.light_window.adjustSize()
-        self.light_window.setVisible(True)
-
-    def show_filters_dialog(self):
-        self.filters_window.adjustSize()
-        self.filters_window.setVisible(True)

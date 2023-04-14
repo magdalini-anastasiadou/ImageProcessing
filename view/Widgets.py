@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import (QLabel, QSizePolicy, QScrollArea, QWidget, 
-                             QHBoxLayout, QVBoxLayout, QBoxLayout, QDockWidget, QSlider, QPushButton)
+                             QHBoxLayout, QVBoxLayout, QBoxLayout, QDockWidget, 
+                             QSlider, QPushButton, QSpinBox)
 from PyQt5.QtGui import QImage, QPixmap, QShowEvent, QIcon
 from PyQt5.QtCore import Qt, pyqtSignal
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -61,6 +62,26 @@ class PlotWindow(QDockWidget):
         self.canvas.draw()
         self.adjustSize()
         self.setVisible(True)
+
+
+class SpinBox(QWidget):
+    valueChanged = pyqtSignal(int)
+    def __init__(self, name:str, min_val: int, max_val: int, step: int = 1):
+        super().__init__()
+        label = QLabel(name)
+        self._spinBox = QSpinBox()
+        self._spinBox.setMinimum(min_val)
+        self._spinBox.setMaximum(max_val)
+        self._spinBox.setSingleStep(step)
+        h_layout = QHBoxLayout()
+        h_layout.addWidget(label)
+        h_layout.addWidget(self._spinBox)
+        self.setLayout(h_layout)
+        self._spinBox.valueChanged.connect(lambda value: self.valueChanged.emit(value))
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self._spinBox.setValue(0)
+        return super().showEvent(a0)
 
 
 class Slider(QWidget):
