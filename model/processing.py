@@ -53,9 +53,9 @@ class Image:
 
     def average_filter(self, size: int) -> None:
         if size != 0:
-            filter_image = np.ones((size, size)) / (size * size)
-            red = signal.convolve(self.data[:, :, 0], filter_image, mode="same")
-            green = signal.convolve(self.data[:, :, 1], filter_image, mode="same")
-            blue = signal.convolve(self.data[:, :, 2], filter_image, mode="same")
+            kernel = np.ones((size, size)) / (size * size)
+            red = signal.convolve(self.data[:, :, 0], kernel, mode="same")
+            green = signal.convolve(self.data[:, :, 1], kernel, mode="same")
+            blue = signal.convolve(self.data[:, :, 2], kernel, mode="same")
             self.data = np.dstack((red, green, blue))
             self.data = np.clip(self.data, 0, 255).astype(np.uint8)
