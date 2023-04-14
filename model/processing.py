@@ -51,11 +51,30 @@ class Image:
             factor = (259 * (contrast + 255)) / (255 * (259 + contrast))
         self.data = np.clip((factor * (data - 128) + 128), 0, 255).astype(np.uint8)
 
+    def _convolve(self, kernel: np.ndarray) -> None:
+        red = signal.convolve(self.data[:, :, 0], kernel, mode="same")
+        green = signal.convolve(self.data[:, :, 1], kernel, mode="same")
+        blue = signal.convolve(self.data[:, :, 2], kernel, mode="same")
+        self.data = np.dstack((red, green, blue))
+        self.data = np.clip(self.data, 0, 255).astype(np.uint8)
+
     def average_filter(self, size: int) -> None:
         if size != 0:
             kernel = np.ones((size, size)) / (size * size)
-            red = signal.convolve(self.data[:, :, 0], kernel, mode="same")
-            green = signal.convolve(self.data[:, :, 1], kernel, mode="same")
-            blue = signal.convolve(self.data[:, :, 2], kernel, mode="same")
-            self.data = np.dstack((red, green, blue))
-            self.data = np.clip(self.data, 0, 255).astype(np.uint8)
+            self._convolve(kernel)
+
+    def gaussian_blur(self, size: int) -> None:
+        if size != 0:
+            if size % 2 == 0:
+                size += 1
+            sigma = size / 6
+            x, y = np.meshgrid(
+                np.linspace(-1, 1, size),
+                np.linspace(-1, 1, size)
+            )
+            d = np.sqrt(x*x+y*y)
+            kernel = np.exp(
+                -(d**2 / (2.0*sigma**2))
+            )
+            kernel /= np.sum(kernel)
+            self._convolve(kernel)

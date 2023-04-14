@@ -77,7 +77,7 @@ class SpinBox(QWidget):
         h_layout.addWidget(label)
         h_layout.addWidget(self._spinBox)
         self.setLayout(h_layout)
-        self._spinBox.valueChanged.connect(lambda value: self.valueChanged.emit(value))
+        self._spinBox.editingFinished.connect(lambda: self.valueChanged.emit(self._spinBox.value()))
 
     def showEvent(self, a0: QShowEvent) -> None:
         self._spinBox.setValue(0)

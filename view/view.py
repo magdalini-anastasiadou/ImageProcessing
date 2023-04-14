@@ -121,9 +121,11 @@ class ImageEditor(QMainWindow):
 
     def create_filters_window(self):
         window = EditWindow("Filters", "view/icons/magic-wand.png")
-        average_spin_box = SpinBox("Average Filter", 0, 100)
-        average_spin_box.valueChanged.connect(self.presenter.handle_average_filter)
-        window.createUI([average_spin_box])
+        average_filter = SpinBox("Average Filter", 0, 10)
+        average_filter.valueChanged.connect(self.presenter.handle_average_filter)
+        gaussian_blur = SpinBox("Fuzzy Filter", 0, 10)
+        gaussian_blur.valueChanged.connect(self.presenter.handle_gaussian_blur)
+        window.createUI([average_filter, gaussian_blur])
         window.onCancel.connect(self.presenter.handle_cancel)
         window.onAccept.connect(self.presenter.handle_accept)
         return window

@@ -42,3 +42,6 @@ class Presenter:
 
     def handle_average_filter(self, value: int):
         self.model.set_attribute("average_filter", value)
+
+    def handle_gaussian_blur(self, value: int):
+        self.model.set_attribute("gaussian_blur", value)

@@ -15,7 +15,8 @@ class Model():
         self._methods_map = {
             "brightness": Image.set_brightness, 
             "contrast": Image.set_contrast, 
-            "average_filter": Image.average_filter
+            "average_filter": Image.average_filter,
+            "gaussian_blur": Image.gaussian_blur,
         }
         self._edit_actions = []
         self._last_accepted_idx = 0
