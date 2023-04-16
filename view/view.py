@@ -1,7 +1,8 @@
 from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow, SpinBox
 
 import numpy as np
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog)
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog,
+                             QVBoxLayout, QGridLayout, QLabel)
 from PyQt5.QtGui import QImage, QIcon
 
 
@@ -110,22 +111,30 @@ class ImageEditor(QMainWindow):
 
     def create_light_window(self):
         b_slider = Slider("Brightness", 'view/icons/sun.png', -100, 100)
-        b_slider.valueChanged.connect(self.presenter.handle_brightness_changed)
+        b_slider.value_changed.connect(self.presenter.handle_brightness_changed)
         c_slider = Slider("Contrast", 'view/icons/contrast.png', -100, 100)
-        c_slider.valueChanged.connect(self.presenter.handle_contrast_changed)
+        c_slider.value_changed.connect(self.presenter.handle_contrast_changed)
         window = EditWindow("Light", "view/icons/sunny-black.png")
         window.onCancel.connect(self.presenter.handle_cancel)
         window.onAccept.connect(self.presenter.handle_accept)
-        window.createUI([b_slider, c_slider])
+        layout = QVBoxLayout()
+        layout.addWidget(b_slider)
+        layout.addWidget(c_slider)
+        window.createUI(layout)
         return window
 
     def create_filters_window(self):
         window = EditWindow("Filters", "view/icons/magic-wand.png")
-        average_filter = SpinBox("Average Filter", 0, 10)
-        average_filter.valueChanged.connect(self.presenter.handle_average_filter)
-        gaussian_blur = SpinBox("Fuzzy Filter", 0, 10)
-        gaussian_blur.valueChanged.connect(self.presenter.handle_gaussian_blur)
-        window.createUI([average_filter, gaussian_blur])
+        layout = QGridLayout()
+        s1 = SpinBox(0, 10)
+        s2 = SpinBox(0, 10)
+        layout.addWidget(QLabel("Average Blur"), 0, 0)
+        layout.addWidget(s1, 0, 1)
+        layout.addWidget(QLabel("Fuzzy Blur"), 1, 0)
+        layout.addWidget(s2, 1, 1)
+        s1.value_changed.connect(self.presenter.handle_average_filter)
+        s2.value_changed.connect(self.presenter.handle_average_filter)
+        window.createUI(layout)
         window.onCancel.connect(self.presenter.handle_cancel)
         window.onAccept.connect(self.presenter.handle_accept)
         return window

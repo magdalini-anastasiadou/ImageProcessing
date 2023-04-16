@@ -64,28 +64,23 @@ class PlotWindow(QDockWidget):
         self.setVisible(True)
 
 
-class SpinBox(QWidget):
-    valueChanged = pyqtSignal(int)
-    def __init__(self, name:str, min_val: int, max_val: int, step: int = 1):
+class SpinBox(QSpinBox):
+    value_changed = pyqtSignal(int)
+    def __init__(self, min_val: int, max_val: int, step: int = 1):
         super().__init__()
-        label = QLabel(name)
-        self._spinBox = QSpinBox()
-        self._spinBox.setMinimum(min_val)
-        self._spinBox.setMaximum(max_val)
-        self._spinBox.setSingleStep(step)
-        h_layout = QHBoxLayout()
-        h_layout.addWidget(label)
-        h_layout.addWidget(self._spinBox)
-        self.setLayout(h_layout)
-        self._spinBox.editingFinished.connect(lambda: self.valueChanged.emit(self._spinBox.value()))
+        self.setMinimum(min_val)
+        self.setMaximum(max_val)
+        self.setSingleStep(step)
+        self.editingFinished.connect(lambda: self.value_changed.emit(self.value()))
+
 
     def showEvent(self, a0: QShowEvent) -> None:
-        self._spinBox.setValue(0)
+        self.setValue(0)
         return super().showEvent(a0)
 
 
 class Slider(QWidget):
-    valueChanged = pyqtSignal(int)
+    value_changed = pyqtSignal(int)
     def __init__(self, name:str, icon:str, min_val: int, max_val: int):
         super().__init__()
 
@@ -113,7 +108,7 @@ class Slider(QWidget):
         self.setLayout(v_layout)
 
         self._slider.valueChanged.connect(lambda value: self._value_label.setText(str(value)))
-        self._slider.valueChanged.connect(lambda value: self.valueChanged.emit(value))
+        self._slider.valueChanged.connect(lambda value: self.value_changed.emit(value))
 
     def showEvent(self, a0: QShowEvent) -> None:
         self._slider.setValue(0)
@@ -132,11 +127,9 @@ class EditWindow(QDockWidget):
         self.setWindowIcon(QIcon(icon_path))
         self.setVisible(False)
 
-    def createUI(self, children: list):
+    def createUI(self, layout: QBoxLayout):
         v_layout = QVBoxLayout()
-        for child in children:
-            v_layout.addWidget(child)
-
+        v_layout.addLayout(layout)
         h_layout = QHBoxLayout()
         cancel_button = QPushButton("Cancel")
         apply_button = QPushButton("Apply")
