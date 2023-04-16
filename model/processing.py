@@ -78,3 +78,8 @@ class Image:
             )
             kernel /= np.sum(kernel)
             self._convolve(kernel)
+
+    def snr(self, image: Image) -> float:
+        p_signal = np.sum(image.data ** 2)
+        p_noise = np.sum((self.data - image.data) ** 2)
+        return 10 * np.log10(p_signal / p_noise)
