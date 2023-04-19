@@ -40,6 +40,12 @@ class Presenter:
     def handle_accept(self):
         self.model.accept()
 
+    def handle_undo(self):
+        pass
+
+    def handle_redo(self):
+        pass
+
     def handle_average_filter(self, value: int):
         self.model.set_attribute("average_filter", value)
 

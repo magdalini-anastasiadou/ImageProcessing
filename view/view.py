@@ -15,6 +15,7 @@ class ImageEditor(QMainWindow):
         self.setWindowTitle("Image Editor")
         self.setWindowIcon(QIcon("view/icons/colour.png"))
         self.create_file_menu()
+        self.create_edit_menu()
         self.create_adjust_menu()
         self.create_view_menu()
         self.set_window_style()
@@ -29,7 +30,7 @@ class ImageEditor(QMainWindow):
 
     def create_file_menu(self):
         menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu(QIcon('view/icons/menu.png'), '')
+        file_menu = menu_bar.addMenu("&File")
 
         new_file_action = QAction('New File', self)
         new_file_action.setShortcut('Ctrl+N')
@@ -46,21 +47,36 @@ class ImageEditor(QMainWindow):
         save_file_action.triggered.connect(self.save_file)
         file_menu.addAction(save_file_action)
 
+    def create_edit_menu(self):
+        menuBar = self.menuBar()
+        edit_menu = menuBar.addMenu("&Edit")
+
+        undo_action = QAction("&Undo", self)
+        undo_action.setShortcut('Ctrl+Z')
+        undo_action.triggered.connect(self.presenter.handle_undo)
+        edit_menu.addAction(undo_action)
+
+        redo_action = QAction("&Redo", self)
+        redo_action.setShortcut('Ctrl+Y')
+        redo_action.triggered.connect(self.presenter.handle_redo)
+        edit_menu.addAction(redo_action)
+
+
     def create_adjust_menu(self):
         menu_bar = self.menuBar()
-        adjust_menu = menu_bar.addMenu(QIcon('view/icons/edit.png'), "")
+        adjust_menu = menu_bar.addMenu("&Adjust")
 
-        light_action = QAction(QIcon('view/icons/sunny.png'), '&Light', self)
+        light_action = QAction('&Light', self)
         light_action.triggered.connect(self.light_window.show)
         adjust_menu.addAction(light_action)
 
-        filters_action = QAction(QIcon('view/icons/magic-wand.png'), '&Filters', self)
+        filters_action = QAction('&Blur', self)
         filters_action.triggered.connect(self.filters_window.show)
         adjust_menu.addAction(filters_action)
 
     def create_view_menu(self):
         menu_bar = self.menuBar()
-        view_menu = menu_bar.addMenu(QIcon('view/icons/histogram.png'), '')
+        view_menu = menu_bar.addMenu("&View")
 
         histogram_action = QAction('&Histogram', self)
         histogram_action.triggered.connect(self.presenter.handle_show_histogram)
