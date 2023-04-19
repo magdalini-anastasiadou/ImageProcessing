@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import cv2
 import numpy as np
-from scipy import signal
 import matplotlib.pyplot as plt
 
 
 class Image:
     def __init__(self, data: np.ndarray) -> None:
-        self.data = data
+        self.data = data.copy()
 
     @property
     def num_channels(self):
@@ -40,8 +39,12 @@ class Image:
         return figure
 
     def set_brightness(self, brightness: int) -> None:
-        data = self.data.astype(np.int16)
-        self.data = np.clip(data + brightness, 0, 255).astype(np.uint8)
+        if brightness > 0:
+            array = np.full(self.data.shape, brightness, dtype=np.uint8)
+            cv2.add(self.data, array, self.data)
+        else:
+            array = np.full(self.data.shape, -brightness, dtype=np.uint8)
+            cv2.subtract(self.data, array, self.data)
 
     def set_contrast(self, contrast: int) -> None:
         data = self.data.astype(np.int16)
@@ -51,35 +54,22 @@ class Image:
             factor = (259 * (contrast + 255)) / (255 * (259 + contrast))
         self.data = np.clip((factor * (data - 128) + 128), 0, 255).astype(np.uint8)
 
-    def _convolve(self, kernel: np.ndarray) -> None:
-        red = signal.convolve(self.data[:, :, 0], kernel, mode="same")
-        green = signal.convolve(self.data[:, :, 1], kernel, mode="same")
-        blue = signal.convolve(self.data[:, :, 2], kernel, mode="same")
-        self.data = np.dstack((red, green, blue))
-        self.data = np.clip(self.data, 0, 255).astype(np.uint8)
+    @staticmethod
+    def _run_for_valid_kernel_size(func):
+        def wrapper(self, size: int, *args) -> None:
+            size = size if size % 2 == 1 and size > 1 else max(3, size + 1)
+            func(self, size, *args)
+        return wrapper
 
+    @_run_for_valid_kernel_size
     def average_filter(self, size: int) -> None:
-        if size != 0:
-            kernel = np.ones((size, size)) / (size * size)
-            self._convolve(kernel)
+        cv2.blur(self.data, (size, size), self.data)
 
+    @_run_for_valid_kernel_size
     def gaussian_blur(self, size: int) -> None:
-        if size != 0:
-            if size % 2 == 0:
-                size += 1
-            sigma = size / 6
-            x, y = np.meshgrid(
-                np.linspace(-1, 1, size),
-                np.linspace(-1, 1, size)
-            )
-            d = np.sqrt(x*x+y*y)
-            kernel = np.exp(
-                -(d**2 / (2.0*sigma**2))
-            )
-            kernel /= np.sum(kernel)
-            self._convolve(kernel)
+        sigma = size / 6
+        cv2.GaussianBlur(self.data, (size, size), sigma, self.data, sigma)
 
-    def snr(self, image: Image) -> float:
-        p_signal = np.sum(image.data ** 2)
-        p_noise = np.sum((self.data - image.data) ** 2)
-        return 10 * np.log10(p_signal / p_noise)
+    @_run_for_valid_kernel_size
+    def median_filter(self, size: int) -> None:
+        cv2.medianBlur(self.data, size, self.data)

@@ -17,6 +17,7 @@ class Model():
             "contrast": Image.set_contrast, 
             "average_filter": Image.average_filter,
             "gaussian_blur": Image.gaussian_blur,
+            "median_blur": Image.median_filter
         }
         self._edit_actions = []
         self._last_accepted_idx = 0

@@ -45,3 +45,6 @@ class Presenter:
 
     def handle_gaussian_blur(self, value: int):
         self.model.set_attribute("gaussian_blur", value)
+
+    def handle_median_blur(self, value: int):
+        self.model.set_attribute("median_blur", value)
