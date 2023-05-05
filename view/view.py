@@ -1,86 +1,106 @@
-from view.Widgets import ImageArea, PlotWindow, Slider, EditWindow, SpinBox
+from view.Widgets import ImageWindow, Slider, EditWindow
 
 import numpy as np
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QFileDialog,
-                             QVBoxLayout, QGridLayout, QLabel)
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QFileDialog, QSpacerItem,
+                             QVBoxLayout, QPushButton, QHBoxLayout, QWidget, QSizePolicy, QAction)
 from PyQt5.QtGui import QImage, QIcon
+from PyQt5.QtCore import Qt
 
 
 class ImageEditor(QMainWindow):
     def initUI(self, presenter):
         self.presenter = presenter
-        self.plot_window = PlotWindow(self)
         self.create_central_widget()
-
+        self.create_actions()
         self.setWindowTitle("Image Editor")
-        self.setWindowIcon(QIcon("view/icons/colour.png"))
-        self.create_file_menu()
-        self.create_edit_menu()
-        self.create_adjust_menu()
-        self.create_view_menu()
+        self.setWindowIcon(QIcon("view/icons/design.png"))
         self.set_window_style()
         self.showMaximized()
 
+    def create_actions(self):
+        open_action = QAction(self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.open_file)
+        self.addAction(open_action)
+
+        save_action = QAction(self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_file)
+        self.addAction(save_action)
+
+        exit_action = QAction(self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close)
+
     def create_central_widget(self):
-        self.image_label = ImageArea(self)
-        self.light_window = self.create_light_window()
-        self.filters_window = self.create_filters_window()
+        self.side_bar = self.create_sidebar()
+        self.side_bar.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        self.image_label = ImageWindow(self)
+        self.image_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        
+        widget = QWidget()
+        layout = QHBoxLayout()
+        layout.addWidget(self.side_bar)
+        layout.addWidget(self.image_label)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        widget.setLayout(layout)
+        layout.setStretchFactor(self.side_bar, 1)
+        layout.setStretchFactor(self.image_label, 30)
+        self.setCentralWidget(widget)
 
-        self.setCentralWidget(self.image_label)
+    def create_sidebar(self):
+        menu_btn = QPushButton(QIcon("view/icons/menu.png"), "")
+        menu_btn.setFlat(True)
 
-    def create_file_menu(self):
-        menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu("&File")
+        open_btn = QPushButton(QIcon("view/icons/add-image.png", ), "")
+        open_btn.setFlat(True)
+        open_btn.clicked.connect(self.open_file)
 
-        new_file_action = QAction('New File', self)
-        new_file_action.setShortcut('Ctrl+N')
-        new_file_action.triggered.connect(self.presenter.handle_new_image)
-        file_menu.addAction(new_file_action)
+        light_window = self.create_light_window()
+        edit_btn = QPushButton(QIcon("view/icons/edit.png"), "")
+        edit_btn.setFlat(True)
+        edit_btn.clicked.connect(lambda: light_window.setVisible(not light_window.isVisible()))
 
-        open_file_action = QAction('Open File...', self)
-        open_file_action.setShortcut('Ctrl+O')
-        open_file_action.triggered.connect(self.open_file)
-        file_menu.addAction(open_file_action)
+        save_btn = QPushButton(QIcon("view/icons/download.png", ), "")
+        save_btn.setFlat(True)
+        save_btn.clicked.connect(self.save_file)
 
-        save_file_action = QAction('Save', self)
-        save_file_action.setShortcut('Ctrl+S')
-        save_file_action.triggered.connect(self.save_file)
-        file_menu.addAction(save_file_action)
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.setSpacing(20)
+        sidebar_layout.setContentsMargins(0, 20, 0, 0)
+        sidebar_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        sidebar_layout.addWidget(open_btn)
+        sidebar_layout.addWidget(edit_btn)
+        sidebar_layout.addWidget(save_btn)
 
-    def create_edit_menu(self):
-        menuBar = self.menuBar()
-        edit_menu = menuBar.addMenu("&Edit")
+        hboxLayout = QHBoxLayout()
+        hboxLayout.setContentsMargins(0, 0, 0, 0)
+        hboxLayout.setSpacing(0)
+        hboxLayout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        hboxLayout.addLayout(sidebar_layout)
+        hboxLayout.addWidget(light_window)
 
-        undo_action = QAction("&Undo", self)
-        undo_action.setShortcut('Ctrl+Z')
-        undo_action.triggered.connect(self.presenter.handle_undo)
-        edit_menu.addAction(undo_action)
+        sidebar_widget = QWidget()
+        sidebar_widget.setLayout(hboxLayout)
+        
+        stacked_widget1 = QStackedWidget()
+        stacked_widget1.addWidget(QWidget())
+        stacked_widget1.addWidget(sidebar_widget)
+        stacked_widget1.setCurrentIndex(1)
 
-        redo_action = QAction("&Redo", self)
-        redo_action.setShortcut('Ctrl+Y')
-        redo_action.triggered.connect(self.presenter.handle_redo)
-        edit_menu.addAction(redo_action)
+        menu_btn.clicked.connect(lambda: stacked_widget1.setCurrentIndex(stacked_widget1.currentIndex() == 0))
 
+        vboxLayout = QVBoxLayout()
+        vboxLayout.addWidget(menu_btn)
+        vboxLayout.addWidget(stacked_widget1)
+        vboxLayout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        vboxLayout.setContentsMargins(10, 20, 0, 0)
 
-    def create_adjust_menu(self):
-        menu_bar = self.menuBar()
-        adjust_menu = menu_bar.addMenu("&Adjust")
-
-        light_action = QAction('&Light', self)
-        light_action.triggered.connect(self.light_window.show)
-        adjust_menu.addAction(light_action)
-
-        filters_action = QAction('&Blur', self)
-        filters_action.triggered.connect(self.filters_window.show)
-        adjust_menu.addAction(filters_action)
-
-    def create_view_menu(self):
-        menu_bar = self.menuBar()
-        view_menu = menu_bar.addMenu("&View")
-
-        histogram_action = QAction('&Histogram', self)
-        histogram_action.triggered.connect(self.presenter.handle_show_histogram)
-        view_menu.addAction(histogram_action)
+        widget = QWidget()
+        widget.setLayout(vboxLayout)
+        widget.setStyleSheet("background-color: #2c3e50;")
+        return widget
 
     def set_window_style(self):
         with open('view/stylesheet.qss') as f:
@@ -97,19 +117,10 @@ class ImageEditor(QMainWindow):
             self.setWindowTitle("Image Editor")
             self.image_label.refresh(None)
 
-    def set_plot(self, figure):
-        if figure is not None:
-            self.plot_window.refresh(figure)
-        else:
-            self.plot_window.setVisible(False)
-
-    def is_plot_visible(self):
-        return self.plot_window.isVisible()
-
     def open_file(self):
         dialog = QFileDialog()
         dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
-        dialog.setNameFilter("Images (*.png *.xpm *.jpg *.bmp *.gif)")
+        dialog.setNameFilter("Images (*.png *.jpg)")
         if dialog.exec():
             path = dialog.selectedFiles()[0]
             self.setWindowTitle(path)
@@ -126,35 +137,21 @@ class ImageEditor(QMainWindow):
             self.presenter.handle_save_file(path)
 
     def create_light_window(self):
-        b_slider = Slider("Brightness", 'view/icons/sun.png', -100, 100)
-        b_slider.value_changed.connect(self.presenter.handle_brightness_changed)
-        c_slider = Slider("Contrast", 'view/icons/contrast.png', -100, 100)
-        c_slider.value_changed.connect(self.presenter.handle_contrast_changed)
-        window = EditWindow("Light", "view/icons/sunny-black.png")
+        window = EditWindow()
         window.onCancel.connect(self.presenter.handle_cancel)
         window.onAccept.connect(self.presenter.handle_accept)
+
+        b_slider = Slider("Brightness", -100, 100)
+        c_slider = Slider("Contrast", -100, 100)
+        g_slider = Slider("Blur", 0, 10)
+
+        b_slider.value_changed.connect(self.presenter.handle_brightness_changed)
+        c_slider.value_changed.connect(self.presenter.handle_contrast_changed)
+        g_slider.value_changed.connect(self.presenter.handle_gaussian_blur)
+
         layout = QVBoxLayout()
         layout.addWidget(b_slider)
         layout.addWidget(c_slider)
+        layout.addWidget(g_slider)
         window.createUI(layout)
-        return window
-
-    def create_filters_window(self):
-        window = EditWindow("Filters", "view/icons/magic-wand.png")
-        layout = QGridLayout()
-        s1 = SpinBox(0, 10)
-        s2 = SpinBox(0, 10)
-        s3 = SpinBox(0, 10)
-        layout.addWidget(QLabel("Average Blur"), 0, 0)
-        layout.addWidget(s1, 0, 1)
-        layout.addWidget(QLabel("Fuzzy Blur"), 1, 0)
-        layout.addWidget(s2, 1, 1)
-        layout.addWidget(QLabel("Median Blur"), 2, 0)
-        layout.addWidget(s3, 2, 1)
-        s1.value_changed.connect(self.presenter.handle_average_filter)
-        s2.value_changed.connect(self.presenter.handle_gaussian_blur)
-        s3.value_changed.connect(self.presenter.handle_median_blur)
-        window.createUI(layout)
-        window.onCancel.connect(self.presenter.handle_cancel)
-        window.onAccept.connect(self.presenter.handle_accept)
         return window

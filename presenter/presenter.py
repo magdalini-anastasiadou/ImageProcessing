@@ -4,7 +4,6 @@ class Presenter:
     def __init__(self, model, view):
         self.model = model
         self.model.image_changed.connect(self.update_view)
-        self.model.image_changed.connect(self.update_plot)
         self.view = view
 
     def handle_new_image(self):
@@ -19,14 +18,6 @@ class Presenter:
     def update_view(self):
         data = self.model.get_data()
         self.view.set_data(data)
-
-    def handle_show_histogram(self):
-        figure = self.model.get_histogram_figure()
-        self.view.set_plot(figure)
-
-    def update_plot(self):
-        if self.view.is_plot_visible():
-            self.handle_show_histogram()
 
     def handle_brightness_changed(self, brightness: float):
         self.model.set_attribute("brightness", brightness)
@@ -46,11 +37,5 @@ class Presenter:
     def handle_redo(self):
         pass
 
-    def handle_average_filter(self, value: int):
-        self.model.set_attribute("average_filter", value)
-
     def handle_gaussian_blur(self, value: int):
         self.model.set_attribute("gaussian_blur", value)
-
-    def handle_median_blur(self, value: int):
-        self.model.set_attribute("median_blur", value)
