@@ -1,6 +1,8 @@
+import typing
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QLabel, QScrollArea, QWidget, QMainWindow, QSizePolicy,
                              QHBoxLayout, QVBoxLayout, QBoxLayout,
-                             QSlider, QPushButton, QSpacerItem)
+                             QSlider, QPushButton, QSpacerItem, QIcon)
 from PyQt5.QtGui import QImage, QPixmap, QShowEvent
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -20,9 +22,9 @@ class ImageWindow(QMainWindow):
         self.scroll_area = QScrollArea()
         self.image_label = QLabel()
         self.image = image or QImage("")
+
         self.image_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.image_label.setVisible(False)
-
         self.image_label.setScaledContents(True)
         self.scroll_area.setWidget(CenterWidget(self.image_label, layout=QHBoxLayout()))
         self.scroll_area.setWidgetResizable(True)
@@ -47,21 +49,40 @@ class Slider(QWidget):
         self._slider.setMinimum(min_val)
         self._slider.setMaximum(max_val)
         self._slider.setTickInterval(1)
+        self._slider.setStyleSheet("""
+            QSlider {
+                background-color: #2c3e50;
+            }
 
-        name_label = QLabel(name)
-        self._value_label = QLabel(str(self._slider.value()))
-        self._value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+            QSlider::groove:horizontal {
+                background-color: #bdc3c7;
+                height: 4px;
+                border-radius: 2px;
+            }
+
+            QSlider::handle:horizontal {
+                background-color: #ecf0f1;
+                border: none;
+                height: 12px;
+                width: 12px;
+                margin: -5px 0;
+                border-radius: 6px;
+            }
+        """)
+
+        value_label = QLabel(str(self._slider.value()))
+        value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         h_layout = QHBoxLayout()
-        h_layout.addWidget(name_label)
-        h_layout.addWidget(self._value_label)
+        h_layout.addWidget(QLabel(name))
+        h_layout.addWidget(value_label)
 
         v_layout = QVBoxLayout()
         v_layout.addLayout(h_layout)
         v_layout.addWidget(self._slider)
         self.setLayout(v_layout)
 
-        self._slider.valueChanged.connect(lambda value: self._value_label.setText(str(value)))
+        self._slider.valueChanged.connect(lambda value: value_label.setText(str(value)))
         self._slider.valueChanged.connect(lambda value: self.value_changed.emit(value))
 
     def showEvent(self, a0: QShowEvent) -> None:
@@ -93,13 +114,43 @@ class EditWindow(QWidget):
         cancel_button.clicked.connect(self.hide)
         cancel_button.clicked.connect(self.onCancel.emit)
         apply_button.clicked.connect(self.onAccept.emit)
+        cancel_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #ecf0f1;
+                border: none;
+                border-radius: 4px;
+                padding: 8px;
+                font-size: 16px;
+            }
 
-        with open('view/cancel_button.qss') as f:
-            stylesheet = f.read()
-            cancel_button.setStyleSheet(stylesheet)
-        
-        with open('view/apply_button.qss') as f:
-            stylesheet = f.read()
-            apply_button.setStyleSheet(stylesheet)
+            QPushButton:hover {
+                background-color: #95a5a6;
+            }
 
+            QPushButton:pressed {
+                background-color: transparent;
+                border: 1px solid #ecf0f1;
+            }
+        """)
+        apply_button.setStyleSheet("""
+            QPushButton {
+                background-color: #bdc3c7;
+                color: #2c3e50;
+                border: none;
+                border-radius: 4px;
+                padding: 8px;
+                font-size: 16px;
+            }
+
+            QPushButton:hover {
+                background-color: #d0d3d4;
+            }
+
+            QPushButton:pressed {
+                background-color: #bdc3c7;
+                border: 1px solid #2c3e50;
+            }
+        """)
         self.setLayout(v_layout)
+
