@@ -1,8 +1,7 @@
-import typing
-from PyQt5 import QtCore
+from contextlib import contextmanager
 from PyQt5.QtWidgets import (QLabel, QScrollArea, QWidget, QMainWindow, QSizePolicy,
-                             QHBoxLayout, QVBoxLayout, QBoxLayout,
-                             QSlider, QPushButton, QSpacerItem, QIcon)
+                             QHBoxLayout, QVBoxLayout, QBoxLayout, QUndoCommand,
+                             QSlider, QPushButton, QSpacerItem)
 from PyQt5.QtGui import QImage, QPixmap, QShowEvent
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -40,16 +39,10 @@ class ImageWindow(QMainWindow):
         self.image_label.setVisible(True)
 
 
-class Slider(QWidget):
-    value_changed = pyqtSignal(int)
-    def __init__(self, name:str, min_val: int, max_val: int):
-        super().__init__()
-
-        self._slider = QSlider(Qt.Orientation.Horizontal)
-        self._slider.setMinimum(min_val)
-        self._slider.setMaximum(max_val)
-        self._slider.setTickInterval(1)
-        self._slider.setStyleSheet("""
+class Slider(QSlider):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet("""
             QSlider {
                 background-color: #2c3e50;
             }
@@ -70,24 +63,22 @@ class Slider(QWidget):
             }
         """)
 
-        value_label = QLabel(str(self._slider.value()))
-        value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+    def previous_value(self) -> int:
+        return self._previous_value if hasattr(self, "_previous_value") else None
 
-        h_layout = QHBoxLayout()
-        h_layout.addWidget(QLabel(name))
-        h_layout.addWidget(value_label)
-
-        v_layout = QVBoxLayout()
-        v_layout.addLayout(h_layout)
-        v_layout.addWidget(self._slider)
-        self.setLayout(v_layout)
-
-        self._slider.valueChanged.connect(lambda value: value_label.setText(str(value)))
-        self._slider.valueChanged.connect(lambda value: self.value_changed.emit(value))
+    def setValue(self, a0: int) -> None:
+        self._previous_value = self.value()
+        return super().setValue(a0)
 
     def showEvent(self, a0: QShowEvent) -> None:
-        self._slider.setValue(0)
+        self.setValue(0)
         return super().showEvent(a0)
+
+    def isUndoRedoActive(self) -> bool:
+        return self._undo_redo_active if hasattr(self, "_undo_redo_active") else False
+
+    def setUndoRedoActive(self, value: bool) -> None:
+        self._undo_redo_active = value
 
 
 class EditWindow(QWidget):
@@ -113,6 +104,7 @@ class EditWindow(QWidget):
 
         cancel_button.clicked.connect(self.hide)
         cancel_button.clicked.connect(self.onCancel.emit)
+        apply_button.clicked.connect(self.hide)
         apply_button.clicked.connect(self.onAccept.emit)
         cancel_button.setStyleSheet("""
             QPushButton {
@@ -153,4 +145,30 @@ class EditWindow(QWidget):
             }
         """)
         self.setLayout(v_layout)
+
+
+class UndoValueCommand(QUndoCommand):
+    def __init__(self, widget, method, value, prev_value):
+        super().__init__()
+        self.widget = widget
+        self.method = method
+        self.prev_value = prev_value
+        self.value = value
+
+    @contextmanager
+    def undo_redo_active(self):
+        current_state = self.widget.isUndoRedoActive()
+        self.widget.setUndoRedoActive(True)
+        yield
+        self.widget.setUndoRedoActive(current_state)
+
+    def redo(self):
+        with self.undo_redo_active():
+            self.widget.setValue(self.value)
+            self.method(self.value)
+
+    def undo(self):
+        with self.undo_redo_active():
+            self.widget.setValue(self.prev_value)
+            self.method(self.prev_value)
 

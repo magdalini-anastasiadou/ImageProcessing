@@ -31,11 +31,5 @@ class Presenter:
     def handle_accept(self):
         self.model.accept()
 
-    def handle_undo(self):
-        pass
-
-    def handle_redo(self):
-        pass
-
     def handle_gaussian_blur(self, value: int):
         self.model.set_attribute("gaussian_blur", value)

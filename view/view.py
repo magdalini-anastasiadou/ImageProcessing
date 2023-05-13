@@ -1,8 +1,8 @@
-from view.Widgets import ImageWindow, Slider, EditWindow
+from view.Widgets import ImageWindow, Slider, EditWindow, UndoValueCommand
 
 import numpy as np
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QFileDialog, QSpacerItem,
-                             QVBoxLayout, QPushButton, QHBoxLayout, QWidget, QSizePolicy, QAction)
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QFileDialog, QUndoStack,
+                             QVBoxLayout, QPushButton, QHBoxLayout, QWidget, QSizePolicy, QAction, QLabel)
 from PyQt5.QtGui import QImage, QIcon
 from PyQt5.QtCore import Qt
 
@@ -31,6 +31,17 @@ class ImageEditor(QMainWindow):
         exit_action = QAction(self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
+
+        self.undo_stack = QUndoStack(self)
+        undo_action = QAction("Undo", self)
+        undo_action.setShortcut("Ctrl+Z")
+        undo_action.triggered.connect(self.undo_stack.undo)
+        self.addAction(undo_action)
+        
+        redo_action = QAction("Redo", self)
+        redo_action.setShortcut("Ctrl+Y")
+        redo_action.triggered.connect(self.undo_stack.redo)
+        self.addAction(redo_action)
 
     def create_central_widget(self):
         self.side_bar = self.create_sidebar()
@@ -95,7 +106,7 @@ class ImageEditor(QMainWindow):
         vboxLayout.addWidget(menu_btn)
         vboxLayout.addWidget(stacked_widget1)
         vboxLayout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        vboxLayout.setContentsMargins(10, 20, 0, 0)
+        vboxLayout.setContentsMargins(20, 20, 20, 0)
 
         widget = QWidget()
         widget.setLayout(vboxLayout)
@@ -139,19 +150,58 @@ class ImageEditor(QMainWindow):
     def create_light_window(self):
         window = EditWindow()
         window.onCancel.connect(self.presenter.handle_cancel)
+        # TODO: need to think about accept the undo stack
+        # for now just clear the undo stack when accept is pressed
         window.onAccept.connect(self.presenter.handle_accept)
+        window.onAccept.connect(lambda: self.undo_stack.clear())
 
-        b_slider = Slider("Brightness", -100, 100)
-        c_slider = Slider("Contrast", -100, 100)
-        g_slider = Slider("Blur", 0, 10)
+        def create_slider(name, min_value, max_value):
+            widget = QWidget()
 
-        b_slider.value_changed.connect(self.presenter.handle_brightness_changed)
-        c_slider.value_changed.connect(self.presenter.handle_contrast_changed)
-        g_slider.value_changed.connect(self.presenter.handle_gaussian_blur)
+            slider = Slider(Qt.Orientation.Horizontal)
+            slider.setRange(min_value, max_value)
+            value_label = QLabel("0")
+            value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+            slider.valueChanged.connect(lambda value: value_label.setText(str(value)))
+            name_label = QLabel(name)
+
+            hlayout = QHBoxLayout()
+            hlayout.addWidget(name_label)
+            hlayout.addWidget(value_label)
+            hlayout.setContentsMargins(0, 0, 0, 0)
+            hlayout.setSpacing(0)
+
+            vlayout = QVBoxLayout()
+            vlayout.addLayout(hlayout)
+            vlayout.addWidget(slider)
+            vlayout.setContentsMargins(0, 0, 0, 0)
+            widget.setLayout(vlayout)
+
+            return widget, slider
+    
+        b_slider_widget, b_slider = create_slider("Brightness", -100, 100)
+        c_slider_widget, c_slider = create_slider("Contrast", -100, 100)
+        g_slider_widget, g_slider = create_slider("Blur", 0, 10)
+
+        b_slider.valueChanged.connect(
+            lambda value: self.undo_stack.push(
+                UndoValueCommand(b_slider, self.presenter.handle_brightness_changed, value, b_slider.previous_value())
+            ) if not b_slider.isUndoRedoActive() else None
+        )
+        c_slider.valueChanged.connect(
+            lambda value: self.undo_stack.push(
+                UndoValueCommand(c_slider, self.presenter.handle_contrast_changed, value, c_slider.previous_value())
+            ) if not c_slider.isUndoRedoActive() else None
+        )
+        g_slider.valueChanged.connect(
+            lambda value: self.undo_stack.push(
+                UndoValueCommand(g_slider, self.presenter.handle_gaussian_blur, value, g_slider.previous_value())
+            ) if not g_slider.isUndoRedoActive() else None
+        )
 
         layout = QVBoxLayout()
-        layout.addWidget(b_slider)
-        layout.addWidget(c_slider)
-        layout.addWidget(g_slider)
+        layout.addWidget(b_slider_widget)
+        layout.addWidget(c_slider_widget)
+        layout.addWidget(g_slider_widget)
         window.createUI(layout)
         return window
