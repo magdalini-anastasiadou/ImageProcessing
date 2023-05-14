@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 from PyQt5.QtWidgets import (QLabel, QScrollArea, QWidget, QMainWindow, QSizePolicy,
                              QHBoxLayout, QVBoxLayout, QBoxLayout, QUndoCommand,
-                             QSlider, QPushButton, QSpacerItem, QLineEdit)
+                             QSlider, QPushButton, QSpacerItem)
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -65,14 +65,14 @@ class Slider(QSlider):
         """)
 
     def previous_value(self) -> int:
-        return self._previous_value if hasattr(self, "_previous_value") else None
+        return getattr(self, "_previous_value", None)
 
     def setValue(self, a0: int) -> None:
         self._previous_value = self.value()
         return super().setValue(a0)
 
     def isUndoRedoActive(self) -> bool:
-        return self._undo_redo_active if hasattr(self, "_undo_redo_active") else False
+        return getattr(self, "_undo_redo_active", None)
 
     def setUndoRedoActive(self, value: bool) -> None:
         self._undo_redo_active = value
@@ -143,7 +143,7 @@ class EditWindow(QWidget):
         self.setLayout(v_layout)
 
     def isUndoRedoActive(self) -> bool:
-        return self._undo_redo_active if hasattr(self, "_undo_redo_active") else False
+        return getattr(self, "_undo_redo_active", False)
 
     def setUndoRedoActive(self, value: bool) -> None:
         self._undo_redo_active = value
@@ -159,10 +159,13 @@ class UndoValueCommand(QUndoCommand):
 
     @contextmanager
     def undo_redo_active(self):
-        current_state = self.widget.isUndoRedoActive()
-        self.widget.setUndoRedoActive(True)
-        yield
-        self.widget.setUndoRedoActive(current_state)
+        if hasattr(self.widget, "setUndoRedoActive"):
+            current_state = self.widget.isUndoRedoActive()
+            self.widget.setUndoRedoActive(True)
+            yield
+            self.widget.setUndoRedoActive(current_state)
+        else:
+            yield
 
     def redo(self):
         with self.undo_redo_active():
