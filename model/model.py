@@ -17,7 +17,13 @@ class Model():
             "contrast": Image.set_contrast, 
             "average_filter": Image.average_filter,
             "gaussian_blur": Image.gaussian_blur,
-            "median_blur": Image.median_filter
+            "median_blur": Image.median_filter,
+            "flip_horizontally": Image.flip_horizontally,
+            "flip_vertically": Image.flip_vertically,
+            "rotate": Image.rotate,
+        }
+        self._following_methods = {
+            "flip_horizontally", "flip_vertically", "rotate"
         }
         self._edit_actions = []
         self._last_accepted_idx = 0
@@ -29,7 +35,8 @@ class Model():
 
     def save_file(self, image_path: str):
         if self.image:
-            self.image.save(image_path)
+            img = self._get_image_with_edits()
+            img.save(image_path)
 
     def clear(self):
         self.image = None
@@ -40,7 +47,10 @@ class Model():
         for method, value, use_last in self._edit_actions:
             if use_last:
                 img = Image(img.data)
-                method(img, value)
+                if value is not None:
+                    method(img, value)
+                else:
+                    method(img)
             else:
                 method(value)
         return img
@@ -55,7 +65,7 @@ class Model():
     def set_attribute(self, name: str, value: Any):
         if name in self._methods_map:
             action = (self._methods_map[name], value, True)
-            if self._edit_actions and self._edit_actions[-1][0] == self._methods_map[name]:
+            if self._edit_actions and self._edit_actions[-1][0] == self._methods_map[name] and name not in self._following_methods:
                 self._edit_actions[-1] = action
             else:
                 self._edit_actions.append(action)

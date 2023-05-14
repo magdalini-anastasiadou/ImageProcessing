@@ -1,7 +1,7 @@
-from view.Widgets import ImageWindow, Slider, EditWindow, UndoValueCommand, AcceptCommand
+from view.Widgets import ImageWindow, Slider, EditWindow, UndoValueCommand, UndoRedoCommand
 
 import numpy as np
-from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QFileDialog, QUndoStack,
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QFileDialog, QUndoStack, QSpinBox,
                              QVBoxLayout, QPushButton, QHBoxLayout, QWidget, QSizePolicy, QAction, QLabel)
 from PyQt5.QtGui import QImage, QIcon
 from PyQt5.QtCore import Qt
@@ -161,9 +161,50 @@ class ImageEditor(QMainWindow):
 
         window.onAccept.connect(
             lambda: self.undo_stack.push(
-                AcceptCommand(window, redo_accept, undo_accept)
+                UndoRedoCommand(window, redo_accept, undo_accept)
             )  if not window.isUndoRedoActive() else None
         )
+        rotation_row = QHBoxLayout()
+        rotation_row.setContentsMargins(0, 20, 0, 20)
+        rotate_left_btn = QPushButton(QIcon("view/icons/rotate-left.png"), "")
+        rotate_left_btn.setToolTip("Rotate left")
+        rotate_right_btn = QPushButton(QIcon("view/icons/rotate-right.png"), "")
+        rotate_right_btn.setToolTip("Rotate right")
+        flip_horizontally_btn = QPushButton(QIcon("view/icons/flip-horizontally.png"), "")
+        flip_horizontally_btn.setToolTip("Flip horizontally")
+        flip_vertically_btn = QPushButton(QIcon("view/icons/flip-vertically.png"), "")
+        flip_vertically_btn.setToolTip("Flip vertically")
+
+        rotate_left_btn.clicked.connect(
+            lambda: self.undo_stack.push(
+                UndoRedoCommand(rotate_left_btn, self.presenter.handle_rotate_left, self.presenter.handle_rotate_right)
+            )
+        )
+        rotate_right_btn.clicked.connect(
+            lambda: self.undo_stack.push(
+                UndoRedoCommand(rotate_right_btn, self.presenter.handle_rotate_right, self.presenter.handle_rotate_left)
+            )
+        )
+        flip_horizontally_btn.clicked.connect(
+            lambda: self.undo_stack.push(
+                UndoRedoCommand(flip_horizontally_btn, self.presenter.handle_flip_horizontally, self.presenter.handle_flip_horizontally)
+            )
+        )
+        flip_vertically_btn.clicked.connect(
+            lambda: self.undo_stack.push(
+                UndoRedoCommand(flip_vertically_btn, self.presenter.handle_flip_vertically, self.presenter.handle_flip_vertically)
+            )
+        )
+
+        rotate_left_btn.setFlat(True)
+        rotate_right_btn.setFlat(True)
+        flip_horizontally_btn.setFlat(True)
+        flip_vertically_btn.setFlat(True)
+
+        rotation_row.addWidget(rotate_left_btn)
+        rotation_row.addWidget(rotate_right_btn)
+        rotation_row.addWidget(flip_horizontally_btn)
+        rotation_row.addWidget(flip_vertically_btn)
 
         def create_slider(name, min_value, max_value):
             widget = QWidget()
@@ -223,5 +264,6 @@ class ImageEditor(QMainWindow):
         layout.addWidget(b_slider_widget)
         layout.addWidget(c_slider_widget)
         layout.addWidget(g_slider_widget)
+        layout.addLayout(rotation_row)
         window.createUI(layout)
         return window

@@ -25,6 +25,18 @@ class Presenter:
     def handle_contrast_changed(self, contrast: float):
         self.model.set_attribute("contrast", contrast)
 
+    def handle_rotate_left(self):
+        self.model.set_attribute("rotate", 90)
+
+    def handle_rotate_right(self):
+        self.model.set_attribute("rotate", -90)
+
+    def handle_flip_horizontally(self):
+        self.model.set_attribute("flip_horizontally", None)
+
+    def handle_flip_vertically(self):
+        self.model.set_attribute("flip_vertically", None)
+
     def handle_cancel(self):
         self.model.cancel()
 

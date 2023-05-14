@@ -73,3 +73,21 @@ class Image:
     @_run_for_valid_kernel_size
     def median_filter(self, size: int) -> None:
         cv2.medianBlur(self.data, size, self.data)
+
+    def rotate(self, angle: int) -> None:
+        height, width = self.data.shape[:2]
+        center_x, center_y = width // 2, height // 2
+        rotation_matrix = cv2.getRotationMatrix2D((center_x, center_y), angle, 1)
+        cosine_rot_matrix = np.abs(rotation_matrix[0, 0])
+        sine_rot_matrix = np.abs(rotation_matrix[0, 1])
+        new_width = int((height * sine_rot_matrix) + (width * cosine_rot_matrix))
+        new_height = int((height * cosine_rot_matrix) + (width * sine_rot_matrix))
+        rotation_matrix[0, 2] += (new_width / 2) - center_x
+        rotation_matrix[1, 2] += (new_height / 2) - center_y
+        self.data = cv2.warpAffine(self.data, rotation_matrix, (new_width, new_height))
+
+    def flip_vertically(self) -> None:
+        cv2.flip(self.data, 0, self.data)
+
+    def flip_horizontally(self) -> None:
+        cv2.flip(self.data, 1, self.data)

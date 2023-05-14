@@ -1,8 +1,9 @@
 from contextlib import contextmanager
+
 from PyQt5.QtWidgets import (QLabel, QScrollArea, QWidget, QMainWindow, QSizePolicy,
                              QHBoxLayout, QVBoxLayout, QBoxLayout, QUndoCommand,
-                             QSlider, QPushButton, QSpacerItem)
-from PyQt5.QtGui import QImage, QPixmap, QShowEvent
+                             QSlider, QPushButton, QSpacerItem, QLineEdit)
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal
 
 
@@ -174,7 +175,7 @@ class UndoValueCommand(QUndoCommand):
             self.method(self.prev_value)
 
 
-class AcceptCommand(QUndoCommand):
+class UndoRedoCommand(QUndoCommand):
     def __init__(self, widget, redo_method, undo_method):
         super().__init__()
         self.widget = widget
@@ -183,10 +184,13 @@ class AcceptCommand(QUndoCommand):
 
     @contextmanager
     def undo_redo_active(self):
-        current_state = self.widget.isUndoRedoActive()
-        self.widget.setUndoRedoActive(True)
-        yield
-        self.widget.setUndoRedoActive(current_state)
+        if hasattr(self.widget, "setUndoRedoActive"):
+            current_state = self.widget.isUndoRedoActive()
+            self.widget.setUndoRedoActive(True)
+            yield
+            self.widget.setUndoRedoActive(current_state)
+        else:
+            yield
 
     def redo(self):
         with self.undo_redo_active():

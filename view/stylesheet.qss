@@ -4,6 +4,7 @@ QWidget {
     font-family: Arial, sans-serif;
     font-size: 14px;
     background-color: #ececec;
+    text-align:left;
 }
 
 ImageWindow {
@@ -23,6 +24,5 @@ QToolBar::handle {
 
 QPushButton {
     icon-size: 24px 24px;
-    text-align:left;
     border: none;
 }
