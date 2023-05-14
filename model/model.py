@@ -65,6 +65,10 @@ class Model():
         self._edit_actions.append((lambda v: True, None, False))
         self._last_accepted_idx = len(self._edit_actions)
 
+    def cancel_accept(self):
+        self._last_accepted_idx = max(0, len(self._edit_actions) - 1)
+        self.cancel()
+
     def cancel(self):
         self._edit_actions = self._edit_actions[:self._last_accepted_idx]
         self.image_changed.emit()

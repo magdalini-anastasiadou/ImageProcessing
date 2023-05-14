@@ -1,4 +1,4 @@
-from view.Widgets import ImageWindow, Slider, EditWindow, UndoValueCommand
+from view.Widgets import ImageWindow, Slider, EditWindow, UndoValueCommand, AcceptCommand
 
 import numpy as np
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QFileDialog, QUndoStack,
@@ -67,6 +67,7 @@ class ImageEditor(QMainWindow):
         open_btn = QPushButton(QIcon("view/icons/add-image.png", ), "")
         open_btn.setFlat(True)
         open_btn.clicked.connect(self.open_file)
+        open_btn.clicked.connect(lambda: self.undo_stack.clear())
 
         light_window = self.create_light_window()
         edit_btn = QPushButton(QIcon("view/icons/edit.png"), "")
@@ -150,20 +151,39 @@ class ImageEditor(QMainWindow):
     def create_light_window(self):
         window = EditWindow()
         window.onCancel.connect(self.presenter.handle_cancel)
-        # TODO: need to think about accept the undo stack
-        # for now just clear the undo stack when accept is pressed
-        window.onAccept.connect(self.presenter.handle_accept)
-        window.onAccept.connect(lambda: self.undo_stack.clear())
+        def undo_accept():
+            self.presenter.handle_cancel_accept()
+            window.show()
+        
+        def redo_accept():
+            self.presenter.handle_accept()
+            window.hide()
+
+        window.onAccept.connect(
+            lambda: self.undo_stack.push(
+                AcceptCommand(window, redo_accept, undo_accept)
+            )  if not window.isUndoRedoActive() else None
+        )
 
         def create_slider(name, min_value, max_value):
             widget = QWidget()
 
             slider = Slider(Qt.Orientation.Horizontal)
             slider.setRange(min_value, max_value)
+            slider.setValue(0)
             value_label = QLabel("0")
             value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
             slider.valueChanged.connect(lambda value: value_label.setText(str(value)))
             name_label = QLabel(name)
+
+            def on_accept():
+                if not window.isUndoRedoActive():
+                    slider.blockSignals(True)
+                    slider.setValue(0)
+                    slider.blockSignals(False)
+                    value_label.setText("0")
+
+            window.onAccept.connect(on_accept)
 
             hlayout = QHBoxLayout()
             hlayout.addWidget(name_label)

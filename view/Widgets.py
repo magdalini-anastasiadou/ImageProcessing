@@ -70,10 +70,6 @@ class Slider(QSlider):
         self._previous_value = self.value()
         return super().setValue(a0)
 
-    def showEvent(self, a0: QShowEvent) -> None:
-        self.setValue(0)
-        return super().showEvent(a0)
-
     def isUndoRedoActive(self) -> bool:
         return self._undo_redo_active if hasattr(self, "_undo_redo_active") else False
 
@@ -104,7 +100,6 @@ class EditWindow(QWidget):
 
         cancel_button.clicked.connect(self.hide)
         cancel_button.clicked.connect(self.onCancel.emit)
-        apply_button.clicked.connect(self.hide)
         apply_button.clicked.connect(self.onAccept.emit)
         cancel_button.setStyleSheet("""
             QPushButton {
@@ -146,6 +141,12 @@ class EditWindow(QWidget):
         """)
         self.setLayout(v_layout)
 
+    def isUndoRedoActive(self) -> bool:
+        return self._undo_redo_active if hasattr(self, "_undo_redo_active") else False
+
+    def setUndoRedoActive(self, value: bool) -> None:
+        self._undo_redo_active = value
+
 
 class UndoValueCommand(QUndoCommand):
     def __init__(self, widget, method, value, prev_value):
@@ -172,3 +173,25 @@ class UndoValueCommand(QUndoCommand):
             self.widget.setValue(self.prev_value)
             self.method(self.prev_value)
 
+
+class AcceptCommand(QUndoCommand):
+    def __init__(self, widget, redo_method, undo_method):
+        super().__init__()
+        self.widget = widget
+        self.redo_method = redo_method
+        self.undo_method = undo_method
+
+    @contextmanager
+    def undo_redo_active(self):
+        current_state = self.widget.isUndoRedoActive()
+        self.widget.setUndoRedoActive(True)
+        yield
+        self.widget.setUndoRedoActive(current_state)
+
+    def redo(self):
+        with self.undo_redo_active():
+            self.redo_method()
+
+    def undo(self):
+        with self.undo_redo_active():
+            self.undo_method()
