@@ -243,6 +243,7 @@ class ImageEditor(QMainWindow):
         b_slider_widget, b_slider = create_slider("Brightness", -100, 100)
         c_slider_widget, c_slider = create_slider("Contrast", -100, 100)
         g_slider_widget, g_slider = create_slider("Blur", 0, 10)
+        s_slider_widget, s_slider = create_slider("Sharpen", 0, 10)
 
         b_slider.valueChanged.connect(
             lambda value: self.undo_stack.push(
@@ -259,11 +260,17 @@ class ImageEditor(QMainWindow):
                 UndoValueCommand(g_slider, self.presenter.handle_gaussian_blur, value, g_slider.previous_value())
             ) if not g_slider.isUndoRedoActive() else None
         )
+        s_slider.valueChanged.connect(
+            lambda value: self.undo_stack.push(
+                UndoValueCommand(s_slider, self.presenter.handle_sharpen, value, s_slider.previous_value())
+            ) if not s_slider.isUndoRedoActive() else None
+        )
 
         layout = QVBoxLayout()
         layout.addWidget(b_slider_widget)
         layout.addWidget(c_slider_widget)
         layout.addWidget(g_slider_widget)
+        layout.addWidget(s_slider_widget)
         layout.addLayout(rotation_row)
         window.createUI(layout)
         return window

@@ -21,6 +21,7 @@ class Model():
             "flip_horizontally": Image.flip_horizontally,
             "flip_vertically": Image.flip_vertically,
             "rotate": Image.rotate,
+            "sharpen": Image.sharpen
         }
         self._following_methods = {
             "flip_horizontally", "flip_vertically", "rotate"

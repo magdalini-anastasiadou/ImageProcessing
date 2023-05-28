@@ -74,6 +74,16 @@ class Image:
     def median_filter(self, size: int) -> None:
         cv2.medianBlur(self.data, size, self.data)
 
+    def sharpen(self, size: int) -> None:
+        center = size
+        other = -(size - 1) / 4
+        kernel = np.array(
+            [[0, other, 0],
+            [other, center, other],
+            [0, other, 0]]
+        )
+        cv2.filter2D(self.data, -1, kernel, self.data)
+
     def rotate(self, angle: int) -> None:
         height, width = self.data.shape[:2]
         center_x, center_y = width // 2, height // 2

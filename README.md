@@ -1,5 +1,5 @@
 # Image Editor with PyQt5 and OpenCV
 
-This is an image editor built using PyQt5 and OpenCV that follows the Model-View-Presenter (MVP) architecture. The application allows users to load and display images, perform basic image processing tasks like adjusting brightness and contrast, apply blur effects, and perform geometric transformations like rotation and flipping. It also supports undo and redo operations and the ability to save the edited image.
+This is an image editor built using PyQt5 and OpenCV that follows the Model-View-Presenter (MVP) architecture. The application allows users to load and display images, perform basic image processing tasks like adjusting brightness and contrast, apply blur and sharpen effects, and perform geometric transformations like rotation and flipping. It also supports undo and redo operations and the ability to save the edited image.
 
 The application is designed to be modular and follows the MVP architecture, separating the presentation logic from the business logic. The Model component represents the data and business logic, the View component represents the UI, and the Presenter component acts as an intermediary between the two, handling user interactions and updating the View with the results of the Model's computations.
