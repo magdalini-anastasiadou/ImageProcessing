@@ -224,7 +224,15 @@ class ImageEditor(QMainWindow):
                     slider.blockSignals(False)
                     value_label.setText("0")
 
+            def on_cancel():
+                if not window.isUndoRedoActive():
+                    slider.blockSignals(True)
+                    slider.setValue(0)
+                    slider.blockSignals(False)
+                    value_label.setText("0")
+
             window.onAccept.connect(on_accept)
+            window.onCancel.connect(on_cancel)
 
             hlayout = QHBoxLayout()
             hlayout.addWidget(name_label)
